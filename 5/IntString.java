@@ -1,7 +1,10 @@
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.TreeSet;
 
 public class IntString implements Comparable<IntString> {
     public String value;
@@ -26,6 +29,10 @@ public class IntString implements Comparable<IntString> {
         if (headBitDifference != 0)
             return headBitDifference;
         return compareStrings(leftSide.substring(1), rightSide.substring(1));
+    }
+
+    public BigInteger subtract(IntString other) {
+        return new BigInteger(this.value).subtract(new BigInteger(other.value));
     }
 
     @Override
@@ -69,6 +76,8 @@ public class IntString implements Comparable<IntString> {
         System.out.print("Part One: ");
         partOne(freshRanges, availableIds);
 
+        System.out.print("Part Two: ");
+        partTwo(freshRanges);
     }
 
     private static void partOne(ArrayList<IntString[]> freshRanges, ArrayList<IntString> availableIds) {
@@ -80,6 +89,45 @@ public class IntString implements Comparable<IntString> {
                     break;
                 }
         System.out.println(result);
+    }
+
+    private static void partTwo(ArrayList<IntString[]> freshRanges) {
+        TreeSet<Range> sortedRanges = new TreeSet<>();
+        for (IntString[] range : freshRanges)
+            sortedRanges.add(new Range(range[0], range[1]));
+
+        ArrayList<Range> mergedRanges = getMergedRanges(sortedRanges);
+
+        BigInteger result = BigInteger.ZERO;
+        for (Range range : mergedRanges) {
+            result = result.add(range.size());
+            System.out.println(range);
+        }
+        System.out.println(result);
+    }
+
+    private static ArrayList<Range> getMergedRanges(TreeSet<Range> sortedRanges) {
+        ArrayList<Range> finalRanges = new ArrayList<>();
+        for (Range range : sortedRanges) {
+            if (finalRanges.isEmpty()) {
+                finalRanges.add(range);
+                continue;
+            }
+
+            boolean hasMerged = false;
+            for (Range target : finalRanges) {
+                if (target.unite(range) != null)
+                    continue;
+
+                hasMerged = true;
+                break;
+            }
+            if (hasMerged)
+                continue;
+
+            finalRanges.add(range);
+        }
+        return finalRanges;
     }
 
 }
